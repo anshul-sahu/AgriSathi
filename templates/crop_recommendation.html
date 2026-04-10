@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommendation</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 50px;
+        }
+        .container {
+            max-width: 700px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #198754; /* Green theme */
+            font-weight: bold;
+        }
+        .card {
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background-color: #ffffff;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .btn-custom {
+            border-radius: 50px;
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .btn-custom:hover {
+            background-color: #157347;
+            border-color: #157347;
+        }
+        #result {
+            margin-top: 25px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #198754;
+            text-align: center;
+        }
+        @media (max-width: 576px) {
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1><i class="bi bi-plant-fill"></i> Crop Recommendation</h1>
+        <p>Enter soil and weather parameters to get the best crop recommendation.</p>
+    </div>
+
+    <div class="card">
+        <form id="predictForm">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" for="n">N (Nitrogen)</label>
+                    <input type="number" class="form-control" name="n" id="n" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="p">P (Phosphorus)</label>
+                    <input type="number" class="form-control" name="p" id="p" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="k">K (Potassium)</label>
+                    <input type="number" class="form-control" name="k" id="k" required>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="temp">Temperature (°C)</label>
+                    <input type="number" class="form-control" name="temp" id="temp" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="humidity">Humidity (%)</label>
+                    <input type="number" class="form-control" name="humidity" id="humidity" required>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="ph">PH</label>
+                    <input type="number" class="form-control" name="ph" id="ph" step="0.01" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="rainfall">Rainfall (mm)</label>
+                    <input type="number" class="form-control" name="rainfall" id="rainfall" step="0.01" required>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-lg btn-custom text-light">
+                    <i class="bi bi-arrow-right-circle-fill"></i> Predict Crop
+                </button>
+            </div>
+        </form>
+
+        <div id="result"></div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.getElementById("predictForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    const data = {
+        n: formData.get("n"),
+        p: formData.get("p"),
+        k: formData.get("k"),
+        temp: formData.get("temp"),
+        humidity: formData.get("humidity"),
+        ph: formData.get("ph"),
+        rainfall: formData.get("rainfall")
+    };
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerText = "Predicting...";
+
+    try {
+        const response = await fetch("/predict_crop", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if(response.ok){
+            resultDiv.innerText = "Recommended Crop: " + result.crop;
+        } else {
+            resultDiv.innerText = "Error: " + result.error;
+        }
+    } catch (err) {
+        resultDiv.innerText = "An error occurred while predicting.";
+        console.error(err);
+    }
+});
+</script>
+
+</body>
+</html>

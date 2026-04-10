@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fertilizer Prediction</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 50px;
+        }
+        .container {
+            max-width: 700px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #198754;
+            font-weight: bold;
+        }
+        .card {
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .btn-custom {
+            border-radius: 50px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #198754;
+            text-align: center;
+        }
+        @media (max-width: 576px) {
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1><i class="bi bi-funnel-fill"></i> Fertilizer Prediction</h1>
+        <p>Enter your crop and soil details to get the recommended fertilizer.</p>
+    </div>
+
+    <div class="card">
+        <form id="predictForm">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" for="temp">Temperature (°C)</label>
+                    <input type="number" class="form-control" name="temp" id="temp" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="humidity">Humidity (%)</label>
+                    <input type="number" class="form-control" name="humidity" id="humidity" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="moisture">Moisture (%)</label>
+                    <input type="number" class="form-control" name="moisture" id="moisture" required>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="soil_type">Soil Type</label>
+                    <select class="form-select" name="soil_type" id="soil_type" required>
+                        <option value="">Select Soil Type</option>
+                        <option value="Black">Black</option>
+                        <option value="Clayey">Clayey</option>
+                        <option value="Loamy">Loamy</option>
+                        <option value="Red">Red</option>
+                        <option value="Sandy">Sandy</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="crop_type">Crop Type</label>
+                    <select class="form-select" name="crop_type" id="crop_type" required>
+                        <option value="">Select Crop Type</option>
+                        <option value="Barley">Barley</option>
+                        <option value="Cotton">Cotton</option>
+                        <option value="Ground Nuts">Ground Nuts</option>
+                        <option value="Maize">Maize</option>
+                        <option value="Millets">Millets</option>
+                        <option value="Oil seeds">Oil seeds</option>
+                        <option value="Paddy">Paddy</option>
+                        <option value="Pulses">Pulses</option>
+                        <option value="Sugarcane">Sugarcane</option>
+                        <option value="Wheat">Wheat</option>
+                        <option value="Rice">Rice</option>
+                        <option value="Watermelon">Watermelon</option>
+                        <option value="Coffee">Coffee</option>
+                        <option value="Pomegranate">Pomegranate</option>
+                        <option value="Kidneybeans">Kidneybeans</option>
+                        <option value="Orange">Orange</option>
+                        <option value="Tobacco">Tobacco</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-3">
+                <div class="col-md-4">
+                    <label class="form-label" for="n">N (Nitrogen)</label>
+                    <input type="number" class="form-control" name="n" id="n" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="p">P (Phosphorus)</label>
+                    <input type="number" class="form-control" name="p" id="p" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="k">K (Potassium)</label>
+                    <input type="number" class="form-control" name="k" id="k" required>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success btn-lg btn-custom">
+                    <i class="bi bi-rocket-fill"></i> Predict
+                </button>
+            </div>
+        </form>
+
+        <div id="result"></div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.getElementById("predictForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    const data = {
+        temp: formData.get("temp"),
+        humidity: formData.get("humidity"),
+        moisture: formData.get("moisture"),
+        soil_type: formData.get("soil_type"),
+        crop_type: formData.get("crop_type"),
+        n: formData.get("n"),
+        p: formData.get("p"),
+        k: formData.get("k")
+    };
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerText = "Predicting...";
+
+    try {
+        const response = await fetch("/predict_fertilizer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if(response.ok){
+            resultDiv.innerText = "Recommended Fertilizer: " + result.fertilizer;
+        } else {
+            resultDiv.innerText = "Error: " + result.error;
+        }
+    } catch (err) {
+        resultDiv.innerText = "An error occurred while predicting.";
+        console.error(err);
+    }
+});
+</script>
+</body>
+</html>
